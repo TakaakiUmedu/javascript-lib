@@ -29,7 +29,17 @@
 		*/
 		
 		
-		puts(new BigInteger([10, 20], true));
+//		puts(new BigInteger([10, 20], true));
+		
+		
+		puts(new BigInteger.Dec1("12345678901234567890"));
+		puts(new BigInteger.DecMax("12345678901234567890"));
+
+		puts(new BigInteger.Dec1("12345678901234567890").add(new BigInteger.Dec1("12345678901234567890")));
+		puts(new BigInteger.DecMax("12345678901234567890").add(new BigInteger.DecMax("12345678901234567890")));
+
+
+		puts(new BigInteger.BinMax("12345678901234567890"));
 		
 		
 		puts(new BigInteger("-10234567890"));
@@ -49,175 +59,214 @@
 		
 //		if(false){
 		
-		puts("【COMP】");
-		for(var i = 0; i < 100; i ++){
-			var n = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
-			var m = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
-			var bn = new BigInteger(n);
-			var bm = new BigInteger(m);
-			
-			var comp = n == m ? 0 : (n > m ? 1 : -1);
-			puts(bn.toString() + " <=> " + bm.toString() + " : " + comp + " <=> " + bn.comp(bm) + " , " + (-bm.comp(bn)));
-			if(comp != bn.comp(bm) || comp != -bm.comp(bn)){
-				alert(bn.toString() + " <=> " + bm.toString() + " : " + comp + " <=> " + bn.comp(bm) + " , " + (-bm.comp(bn)));
-				break;
-			}
-		}
-
-		puts("【ADD】");
-		for(var i = 0; i < 100; i ++){
-			var n = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
-			var m = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
-			var bn = new BigInteger(n);
-			var bm = new BigInteger(m);
-			
-			var res1 = "" + (n + m);
-			var res2 = bn.add(bm).toString();
-			
-			puts("" + n + " + " + m + " : " + res1 + " = " + res2);
-			if(res1 != res2){
-				alert(res1 + " <=> " + res2);
-				break;
-			}
-		}
 		
-		puts("【SUB】");
-		for(var i = 0; i < 100; i ++){
-			var n = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
-			var m = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
-			var bn = new BigInteger(n);
-			var bm = new BigInteger(m);
-			
-			var res1 = "" + (n - m);
-			var res2 = bn.sub(bm).toString();
-			
-			puts("" + n + " - " + m + " : " + res1 + " = " + res2);
-			if(res1 != res2){
-				alert(res1 + " <=> " + res2);
-				break;
-			}
-		}
-
-		puts("【MUL_ONE】");
-		for(var i = 0; i < 100; i ++){
-			var n = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
-			var m = Math.floor(Math.random() * 100);
-			var bn = new BigInteger(n);
-			
-			var res1 = "" + (n * m);
-			var res2 = bn.mul_one(m).toString()
-			
-			puts("" + n + "," + m + ": " + res1 + " = " + res2);
-			if(res1 != res2){
-				alert("" + n + "," + m + ": " + res1 + " <=> " + res2);
-				break;
-			}
-		}
-		
-		
-		puts("【MUL】");
-		for(var i = 0; i < 100; i ++){
-			var n = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
-			var m = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
-			var bn = new BigInteger(n);
-			var bm = new BigInteger(m);
-			
-			var res1 = "" + (n * m);
-			var res2 = bn.mul(bm).toString()
-			
-			puts(res1 + " = " + res2);
-			if(res1 != res2){
-				alert(res1 + " <=> " + res2);
-				break;
-			}
-		}
-		
-//		}
-		
-		puts("【DIV】");
-		for(var i = 0; i < 100; i ++){
-			var n = Math.floor(Math.random() * MAX_INT);
-			var m = Math.floor(Math.random() * Math.sqrt(MAX_INT)) + 1;
-			var bn = new BigInteger(n);
-			var bm = new BigInteger(m);
-			
-			var res1 = "" + ((n - n % m) / m);
-			var res2 = "" + (n % m);
-			var div = bn.div(bm);
-			var res3 = div[0].toString();
-			var res4 = div[1].toString();
-			
-			puts("" + n + " / " + m + " : "+ res1 + " <=> " + res3 + " , " + res2 + " <=> " + res4);
-			if(res1 != res3 || res2 != res4){
-				alert("" + n + " / " + m + " : "+ res1 + " <=> " + res3 + " , " + res2 + " <=> " + res4);
-				break;
-			}
-		}
-		
-		if(false){
-		for(var i = 10000; i < 10001; i ++){
-			print(i + ": ");
-			var n = new BigInteger(i);
-			var list = [];
-			for(var j = 0; j < i; j ++){
-				list.push(j);
-			}
-			while(list.length > 0){
-				var r = parseInt(n.random().toString());
-				if(r >= n){
-					alert(r + " > " + n);
+		function test(BigInteger, output){
+			output("【COMP】");
+			for(var i = 0; i < 100; i ++){
+				var n = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
+				var m = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
+				var bn = new BigInteger(n);
+				var bm = new BigInteger(m);
+				
+				var comp = n == m ? 0 : (n > m ? 1 : -1);
+				output(bn.toString() + " <=> " + bm.toString() + " : " + comp + " <=> " + bn.comp(bm) + " , " + (-bm.comp(bn)));
+				if(comp != bn.comp(bm) || comp != -bm.comp(bn)){
+					alert(bn.toString() + " <=> " + bm.toString() + " : " + comp + " <=> " + bn.comp(bm) + " , " + (-bm.comp(bn)));
 					break;
 				}
-				var index = list.indexOf(r);
-				if(index >= 0){
-					list.splice(index, 1);
-					print(r + ", ");
+			}
+	
+			output("【ADD】");
+			for(var i = 0; i < 100; i ++){
+				var n = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
+				var m = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
+				var bn = new BigInteger(n);
+				var bm = new BigInteger(m);
+				
+				var res1 = "" + (n + m);
+				var res2 = bn.add(bm).toString();
+				
+				output("" + n + " + " + m + " : " + res1 + " = " + res2);
+				if(res1 != res2){
+					alert(res1 + " <=> " + res2);
+					break;
 				}
 			}
-			puts("");
-		}
-		}
-		
-		var a = new BigInteger("18");
-		var t = new BigInteger("33");
-		var n = new BigInteger("67");
-		
-		puts(a.pow(t, n));
-		
-		puts(is_prime(9));
-		
-		for(var i = 1; i < 100;i ++){
-			print(i + ": ");
-			var prime = new BigInteger(i).is_prime();
-			if(prime){
-				print("prime");
-			}else{
-				print("not prime");
-			}
-			if(prime != (is_prime(i) == true)){
-				puts(": ERROR!")
-			}else{
-				puts(": SUCCESS")
-			}
-		}
-		
-		for(var i = 0; i < 100; i ++){
-			var n = Math.floor(Math.random() * MAX_INT * MAX_INT);
-			var bn = new BigInteger(n);
-			var p_n = is_prime(n);
-			var p_bn = bn.is_prime();
 			
-			print(n + ": ");
-			
-			if((p_n == true) != p_bn){
-				puts(": ERROR! : " + p_n + " <=> "+ p_bn + ", " + p_n);
-			}else{
-				puts(": SUCCESS! : " + p_n + " <=> "+ p_bn);
+			output("【SUB】");
+			for(var i = 0; i < 100; i ++){
+				var n = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
+				var m = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
+				var bn = new BigInteger(n);
+				var bm = new BigInteger(m);
+				
+				var res1 = "" + (n - m);
+				var res2 = bn.sub(bm).toString();
+				
+				output("" + n + " - " + m + " : " + res1 + " = " + res2);
+				if(res1 != res2){
+					alert(res1 + " <=> " + res2);
+					break;
+				}
 			}
+	
+			output("【MUL_ONE】");
+			for(var i = 0; i < 100; i ++){
+				var n = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
+				var m = Math.floor(Math.random() * 100);
+				var bn = new BigInteger(n);
+				
+				var res1 = "" + (n * m);
+				var res2 = bn.mul_one(m).toString()
+				
+				output("" + n + "," + m + ": " + res1 + " = " + res2);
+				if(res1 != res2){
+					alert("" + n + "," + m + ": " + res1 + " <=> " + res2);
+					break;
+				}
+			}
+			
+			
+			output("【MUL】");
+			for(var i = 0; i < 100; i ++){
+				var n = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
+				var m = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
+				var bn = new BigInteger(n);
+				var bm = new BigInteger(m);
+				
+				var res1 = "" + (n * m);
+				var res2 = bn.mul(bm).toString()
+				
+				output(res1 + " = " + res2);
+				if(res1 != res2){
+					alert(res1 + " <=> " + res2);
+					break;
+				}
+			}
+			
+			
+	//		return;
+	//		}
+
+			output("【DIV_ONE】");
+			for(var i = 0; i < 100; i ++){
+				var n = Math.floor(Math.random() * MAX_INT);
+				var m = Math.floor(Math.random() * Math.sqrt(MAX_INT)) + 1;
+				var bn = new BigInteger(n);
+				
+				var res1 = "" + ((n - n % m) / m);
+				var res2 = "" + (n % m);
+				var div = bn.div_one(m);
+				var res3 = div[0].toString();
+				var res4 = div[1].toString();
+				
+				output("" + n + " / " + m + " : "+ res1 + " <=> " + res3 + " , " + res2 + " <=> " + res4);
+				if(res1 != res3 || res2 != res4){
+					alert("" + n + " / " + m + " : "+ res1 + " <=> " + res3 + " , " + res2 + " <=> " + res4);
+					break;
+				}
+			}
+						
+			output("【DIV】");
+			for(var i = 0; i < 100; i ++){
+				var n = Math.floor(Math.random() * MAX_INT);
+				var m = Math.floor(Math.random() * Math.sqrt(MAX_INT)) + 1;
+				var bn = new BigInteger(n);
+				var bm = new BigInteger(m);
+				
+				var res1 = "" + ((n - n % m) / m);
+				var res2 = "" + (n % m);
+				var div = bn.div(bm);
+				var res3 = div[0].toString();
+				var res4 = div[1].toString();
+				
+				output("" + n + " / " + m + " : "+ res1 + " <=> " + res3 + " , " + res2 + " <=> " + res4);
+				if(res1 != res3 || res2 != res4){
+					alert("" + n + " / " + m + " : "+ res1 + " <=> " + res3 + " , " + res2 + " <=> " + res4);
+					break;
+				}
+			}
+			
+			if(false){
+			for(var i = 10000; i < 10001; i ++){
+				print(i + ": ");
+				var n = new BigInteger(i);
+				var list = [];
+				for(var j = 0; j < i; j ++){
+					list.push(j);
+				}
+				while(list.length > 0){
+					var r = parseInt(n.random().toString());
+					if(r >= n){
+						alert(r + " > " + n);
+						break;
+					}
+					var index = list.indexOf(r);
+					if(index >= 0){
+						list.splice(index, 1);
+						print(r + ", ");
+					}
+				}
+				output("");
+			}
+			}
+			
+			var a = new BigInteger("18");
+			var t = new BigInteger("33");
+			var n = new BigInteger("67");
+			
+			print = function(){};
+			
+			output(a.pow(t, n));
+			
+			output(is_prime(9));
+			
+			for(var i = 1; i < 100;i ++){
+				print(i + ": ");
+				var prime = new BigInteger(i).is_prime();
+				if(prime){
+					print("prime");
+				}else{
+					print("not prime");
+				}
+				if(prime != (is_prime(i) == true)){
+					output(": ERROR!")
+				}else{
+					output(": SUCCESS")
+				}
+			}
+			
+			for(var i = 0; i < 100; i ++){
+				var n = Math.floor(Math.random() * MAX_INT * MAX_INT);
+				var bn = new BigInteger(n);
+				var p_n = is_prime(n);
+				var p_bn = bn.is_prime();
+				
+				print(n + ": ");
+				
+				if((p_n == true) != p_bn){
+					output(": ERROR! : " + p_n + " <=> "+ p_bn + ", " + p_n);
+				}else{
+					output(": SUCCESS! : " + p_n + " <=> "+ p_bn);
+				}
+			}
+			
+			
 		}
 		
+		var test_list = {
+			BinMax: BigInteger.BinMax,
+			"Dec(1)": BigInteger.Dec1,
+			"Bin(1)": BigInteger.Bin(1),
+		}
 		
-		puts("loop_count: " + BigInteger.get_loop_count());
+		for(let name in test_list){
+			puts("【" + name + "】");
+			var time = new Date();
+			test(test_list[name], function(){});
+			puts(new Date() - time);
+			puts("loop_count: " + BigInteger.get_loop_count());
+		}
 	}
 	
 	
