@@ -26,11 +26,12 @@ if(self["Lib"] == undefined){
 			converted = converter(big_integer_class, src);
 		}
 		
-		if(converted.values.length == 1 && converted.values[0] == 0){
-			minus = false;
-		}
 		dst.values = converted.values;
-		dst.minus = converted.minus;
+		if(converted.values.length == 1 && converted.values[0] == 0){
+			dst.minus = false;
+		}else{
+			dst.minus = converted.minus;
+		}
 		dst.length = dst.values.length;
 		Object.freeze(dst.values);
 		Object.freeze(dst);
@@ -285,7 +286,7 @@ if(self["Lib"] == undefined){
 			if(src.constructor == this){
 				return src;
 			}else{
-				new this(src);
+				return new this(src);
 			}
 		}
 	}
@@ -551,13 +552,13 @@ if(self["Lib"] == undefined){
 			var n_m2 = n.sub(this.constructor.Two);
 			for(var i = 0; i < PRIME_TEST_COUNT; i ++){
 				var a = n_m2.random().add(this.constructor.One);
-				var t = new this.constructor(d);
+				var t = d;
 				var y = a.pow(t, n);
 				while(!t.equals(n_m1) && !y.equals(this.constructor.One) && !y.equals(n_m1)){
 					y = y.mul(y).div(n)[1];
 					t = t.mul_one(2);
 				}
-				if(!y.equals(n_m1) && t.div_one(2) == 0){
+				if(!y.equals(n_m1) && t.div_one(2)[1] == 0){
 					return false;
 				}
 			}
@@ -632,9 +633,12 @@ if(self["Lib"] == undefined){
 	BigInteger.get_loop_count = function(){
 		return loop_count;
 	}
+
+	BigInteger.reset_loop_count = function(){
+		loop_count = 0;
+	}
+
 	
 	Lib.BigInteger = BigInteger;
 	
 })();
-
-

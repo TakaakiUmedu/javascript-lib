@@ -48,6 +48,20 @@
 		var m = new BigInteger("-10234567890");
 		
 		puts(n.add(m));
+		
+		puts(new BigInteger("8"));
+		puts(new BigInteger("-27621977").mul_one(0));
+		
+		puts(":" + (-27621977 * 0));
+		
+		
+		puts("" + (Math.pow(17,10)));
+		puts("" + (Math.pow(17,10) % 157));
+		puts("" + new (BigInteger.Bin(1))(17).pow(10,157));
+		puts("" + new (BigInteger.Dec(1))(17).pow(10,157));
+		
+//		return;
+	
 
 
 //		var n1 = new BigInteger("53282444");
@@ -60,7 +74,7 @@
 //		if(false){
 		
 		
-		function test(BigInteger, output){
+		function test(BigInteger, output, random_list){
 			output("【COMP】");
 			for(var i = 0; i < 100; i ++){
 				var n = Math.floor(Math.random() * MAX_INT - MAX_INT / 2);
@@ -117,11 +131,14 @@
 				var bn = new BigInteger(n);
 				
 				var res1 = "" + (n * m);
-				var res2 = bn.mul_one(m).toString()
+				var res2 = bn.mul_one(m).toString();
 				
 				output("" + n + "," + m + ": " + res1 + " = " + res2);
 				if(res1 != res2){
 					alert("" + n + "," + m + ": " + res1 + " <=> " + res2);
+
+				var res2 = bn.mul_one(m).toString();
+
 					break;
 				}
 			}
@@ -221,23 +238,24 @@
 			
 			output(is_prime(9));
 			
-			for(var i = 1; i < 100;i ++){
-				print(i + ": ");
+			for(var i = 1; i < 200;i ++){
+				let mes = "";
+				mes += (i + ": ");
 				var prime = new BigInteger(i).is_prime();
 				if(prime){
-					print("prime");
+					mes += "prime";
 				}else{
-					print("not prime");
+					mes += "not prime";
 				}
 				if(prime != (is_prime(i) == true)){
-					output(": ERROR!")
+					output(mes + ": ERROR!")
 				}else{
-					output(": SUCCESS")
+					output(mes + ": SUCCESS")
 				}
 			}
 			
-			for(var i = 0; i < 100; i ++){
-				var n = Math.floor(Math.random() * MAX_INT * MAX_INT);
+			for(var i = 0; i < random_list.length; i ++){
+				var n = random_list[i];
 				var bn = new BigInteger(n);
 				var p_n = is_prime(n);
 				var p_bn = bn.is_prime();
@@ -245,9 +263,9 @@
 				print(n + ": ");
 				
 				if((p_n == true) != p_bn){
-					output(": ERROR! : " + p_n + " <=> "+ p_bn + ", " + p_n);
+					output(n + ": ERROR! : " + p_n + " <=> "+ p_bn + ", " + p_n);
 				}else{
-					output(": SUCCESS! : " + p_n + " <=> "+ p_bn);
+					output(n + ": SUCCESS! : " + p_n + " <=> "+ p_bn);
 				}
 			}
 			
@@ -256,14 +274,22 @@
 		
 		var test_list = {
 			BinMax: BigInteger.BinMax,
+			DecMax: BigInteger.DecMax,
 			"Dec(1)": BigInteger.Dec1,
 			"Bin(1)": BigInteger.Bin(1),
 		}
+
+		var random_list = [];
+		for(var i = 0; i < 0; i ++){
+			random_list.push(Math.floor(Math.random() * MAX_INT * MAX_INT));
+		}
 		
 		for(let name in test_list){
+			BigInteger.reset_loop_count();
 			puts("【" + name + "】");
 			var time = new Date();
-			test(test_list[name], function(){});
+//			test(test_list[name], function(mes){mes.toString()}, random_list);
+			test(test_list[name], puts, random_list);
 			puts(new Date() - time);
 			puts("loop_count: " + BigInteger.get_loop_count());
 		}
