@@ -14,16 +14,20 @@ if(self["Lib"] == undefined){
 		var base = Math.pow(b, digits);
 		var n = base - 1;
 		var m = new BigIntegerDec1(b).pow(new BigIntegerDec1(digits)).sub(BigIntegerDec1.One);
-		if((n * n + n).toString() != (m.mul(m).add(m)).toString()){
-			return null;
+		for(let i = 0; i < 10; i ++){
+			if((n * n + n).toString() != (m.mul(m).add(m)).toString()){
+				return null;
+			}
+			n --;
+			m = m.sub(BigIntegerDec1.One);
 		}
 		return base;
 	}
 	
-	function initialize_big_integer(dst, big_integer_class, src, minus_flag, converter){
-		var converted = parse_value(big_integer_class, src, minus_flag);
+	function initialize_big_integer(dst, big_integer_class, src, minus_flag){
+		var converted = parse_value(big_integer_class.base, src, minus_flag);
 		if(converted == null){
-			converted = converter(big_integer_class, src);
+			converted = big_integer_class.parse_str(src);
 		}
 		
 		dst.values = converted.values;
@@ -37,20 +41,14 @@ if(self["Lib"] == undefined){
 		Object.freeze(dst);
 	}
 	
-	function convert_via_dec(big_integer_class, src){
-		return parse_value(big_integer_class, new BigInteger.DecMax(src));
-	}
-	
-	function convert_via_str(big_integer_class, src){
-		return parse_value_dec(src, big_integer_class.digits);
-	}
-
-	function define_big_integer_class(base, converter){
+	function define_big_integer_class(base){
 		function big_integer_class(src, minus_flag){
-			initialize_big_integer(this, big_integer_class, src, minus_flag, converter);
+			initialize_big_integer(this, big_integer_class, src, minus_flag);
 		}
+		
 		copy_properties(BigIntegerClassMethods, big_integer_class);
 		copy_properties(BigIntegerInstanceMethods, big_integer_class.prototype);
+		
 		big_integer_class.big_integer_base = BigIntegerBase;
 		big_integer_class.base = base;
 		big_integer_class.Zero = new big_integer_class(0);
@@ -65,7 +63,8 @@ if(self["Lib"] == undefined){
 		if(base == null){
 			throw "biginteger.js: initialize error, digits too long : " + digits;
 		}
-		var big_integer_class = define_big_integer_class(base, convert_via_dec);
+		var big_integer_class = define_big_integer_class(base);
+		copy_properties(BigIntegerBinInstanceMethods, big_integer_class.prototype);
 		
 		return big_integer_class;
 	}
@@ -78,17 +77,22 @@ if(self["Lib"] == undefined){
 			throw "biginteger.js: initialize error, digits too long : " + digits;
 		}
 		
-		var big_integer_class = define_big_integer_class(base, convert_via_str);
+		var big_integer_class = define_big_integer_class(base);
 		
+		copy_properties(BigIntegerDecClassMethods, big_integer_class);
 		copy_properties(BigIntegerDecInstanceMethods, big_integer_class.prototype);
 		big_integer_class.digits = digits;
 		
 		return big_integer_class;
 	}
 	
-	function parse_value(dst_class, src, minus_flag){
-		if(src.constructor == dst_class){
-			return src;
+	function parse_value(base, src, minus_flag){
+		if(src.constructor.big_integer_base === BigIntegerBase){
+			if(src.constructor.base == base){
+				return src;
+			}else{
+				return convert_base(base, src);
+			}
 		}else if(Array.isArray(src)){
 			let values;
 			let minus;
@@ -100,8 +104,8 @@ if(self["Lib"] == undefined){
 					values.pop();
 				}
 				for(let i = 0; i < values.length; i ++){
-					if(values[i] > dst_class.base){
-						throw "Invalid digit[" + i + "] = " + values[i] + " > BASE = " + dst_class.base;
+					if(values[i] > base){
+						throw "Invalid digit[" + i + "] = " + values[i] + " > BASE = " + base;
 					}
 				}
 			}
@@ -125,56 +129,33 @@ if(self["Lib"] == undefined){
 			src = Math.ceil(src);
 			let values = [];
 			while(src > 0){
-				var r = src % dst_class.base;
+				var r = src % base;
 				values.push(r);
-				src = (src - r) / dst_class.base;
+				src = (src - r) / base;
 			}
 			return {values: values, minus: minus};
-		}else if(src.constructor.big_integer_base == BigIntegerBase){
-			if(src.is_zero()){
-				return {values: [0], minus: false};
-			}
-			var values = [];
-			var minus;
-			if(src.minus){
-				src = src.rev_sign();
-				minus = true;
-			}else{
-				minus = false;
-			}
-			var bi_base = new src.constructor(dst_class.base);
-			while(!src.is_zero()){
-				var div = src.div(bi_base);
-				values.push(div[1].toInt());
-				src = div[0];
-			}
-			return {values:values, minus: minus};
 		}
 		return null;
 	}
 	
-	function parse_value_dec(src, digits){
-		var num_str = "";
-		var regex = /^-/;
-		if(regex.exec(src.toString())){
-			num_str = src.substr(regex.lastIndex + 1);
+	function convert_base(base, src){
+		if(src.is_zero()){
+			return {values: [0], minus: false};
+		}
+		var values = [];
+		var minus;
+		if(src.minus){
+			src = src.rev_sign();
 			minus = true;
 		}else{
-			num_str = src;
 			minus = false;
 		}
-		
-		values = [];
-		while(true){
-			var len = num_str.length;
-			if(len == 0){
-				break;
-			}
-			var cut = len > digits ? digits : len;
-			values.push(parseInt(num_str.substr(len - cut, cut)));
-			num_str = num_str.substr(0, len - cut);
+		while(!src.is_zero()){
+			var div = src.div_one(base);
+			values.push(div[1]);
+			src = div[0];
 		}
-		return {values: values, minus: minus};
+		return {values:values, minus: minus};
 	}
 	
 	function copy_properties(src, dst){
@@ -241,7 +222,8 @@ if(self["Lib"] == undefined){
 		}
 		return values;
 	}
-	
+
+
 	// require: d1 > d2
 	function sub_raw(d1, d2, base){
 		var values = [];
@@ -280,6 +262,40 @@ if(self["Lib"] == undefined){
 		}
 		return values;
 	}
+
+	function and_raw(d1, d2){
+		var values = [];
+		var l1 = d1.length;
+		var l2 = d2.length;
+		var ls = l1 < l2 ? l1 : l2;
+		let i = 0;
+		while(i < ls){
+			values.push(d1[i] & d2[i]);
+			i ++;
+		}
+		return values;
+	}
+
+	function or_raw(d1, d2){
+		var values = [];
+		var l1 = d1.length;
+		var l2 = d2.length;
+		var ls = l1 < l2 ? l1 : l2;
+		let i = 0;
+		while(i < ls){
+			values.push(d1[i] | d2[i]);
+			i ++;
+		}
+		while(i < l1){
+			values.push(d1[i]);
+			i ++;
+		}
+		while(i < l2){
+			values.push(d2[i]);
+			i ++;
+		}
+		return values;
+	}
 	
 	var BigIntegerClassMethods = {
 		convert : function(src){
@@ -288,7 +304,11 @@ if(self["Lib"] == undefined){
 			}else{
 				return new this(src);
 			}
-		}
+		},
+		
+		parse_str: function(src){
+			return convert_base(this.base, new BigInteger.DecMax(src));
+		},
 	}
 	
 	var BigIntegerInstanceMethods = {
@@ -346,8 +366,8 @@ if(self["Lib"] == undefined){
 				return -1;
 			}
 			for(var i = this.length - 1; i >= 0; i --){
-				var d1 = this.get_digit(i);
-				var d2 = num.get_digit(i);
+				var d1 = this.values[i];
+				var d2 = num.values[i];
 				if(d1 > d2){
 					return 1;
 				}else if(d1 < d2){
@@ -379,7 +399,7 @@ if(self["Lib"] == undefined){
 			var values = [];
 			var base = this.constructor.base;
 			while(i < this.length){
-				let n = this.get_digit(i) * num + rest;
+				let n = this.values[i] * num + rest;
 				let m = n % base;
 				values.push(m);
 				rest = (n - m) / base;
@@ -398,7 +418,7 @@ if(self["Lib"] == undefined){
 			var ret = new this.constructor(0);
 			
 			for(var i = 0; i < num.length; i ++){
-				var tmp_values = [].concat(this.mul_one(num.get_digit(i)).values);
+				var tmp_values = [].concat(this.mul_one(num.values[i]).values);
 				for(j = 0; j < i; j ++){
 					tmp_values.unshift(0);
 				}
@@ -412,7 +432,7 @@ if(self["Lib"] == undefined){
 		},
 		
 		is_zero: function(){
-			return this.length == 1 && this.get_digit(0) == 0;
+			return this.length == 1 && this.values[0] == 0;
 		},
 		
 		div: function(num){
@@ -439,7 +459,7 @@ if(self["Lib"] == undefined){
 			while(true){
 				var n = tmp.length - 1;
 				var d1 = rest.get_digit(n + 1) * base + rest.get_digit(n);
-				var d2 = tmp.get_digit(n) + 1;
+				var d2 = tmp.values[n] + 1;
 				var guess = Math.floor(d1 / d2);
 				
 				guess = Lib.bsearch(guess, base, function(n){
@@ -502,9 +522,6 @@ if(self["Lib"] == undefined){
 						res = res.mul(n).div(law)[1];
 					}
 					n = n.mul(n).div(law)[1];
-					if(div[0].values[0] < 0){
-						throw "error";
-					}
 					power = div[0];
 				}
 			}else{
@@ -514,9 +531,6 @@ if(self["Lib"] == undefined){
 						res = res.mul(n);
 					}
 					n = n.mul(n);
-					if(div[0].values[0] < 0){
-						throw "error";
-					}
 					power = div[0];
 				}
 			}
@@ -537,7 +551,7 @@ if(self["Lib"] == undefined){
 			if(n.equals(this.constructor.Two)){
 				return true;
 			}
-			if(n.div(this.constructor.Two)[1].is_zero()){
+			if(n.div_one(2)[1] == 0){
 				return false;
 			}
 			var d = n.sub(this.constructor.One);
@@ -579,6 +593,22 @@ if(self["Lib"] == undefined){
 			return new BigInteger.DecMax(this).toString();
 		},
 		
+		and: function(num){
+			return new this.constructor(new BigInteger.BinMax.new(this).and(new BigInteger.BinMax(num)));
+		},
+		
+		or: function(){
+			return new this.constructor(new BigInteger.BinMax.new(this).or(new BigInteger.BinMax(num)));
+		},
+
+		and_one: function(num){
+			return new BigInteger.BinMax.new(this).and_one(num);
+		},
+		
+		or_one: function(){
+			return new BigInteger.BinMax.new(this).or_one(num);
+		},
+		
 	}
 
 	var BigIntegerDecInstanceMethods = {
@@ -596,7 +626,51 @@ if(self["Lib"] == undefined){
 			}
 			return ret;
 		},
-	}
+	};
+
+	var BigIntegerDecClassMethods = {
+		parse_str: function(src){
+			var num_str = "";
+			var regex = /^-/;
+			if(regex.exec(src.toString())){
+				num_str = src.substr(regex.lastIndex + 1);
+				minus = true;
+			}else{
+				num_str = src;
+				minus = false;
+			}
+			
+			values = [];
+			while(true){
+				var len = num_str.length;
+				if(len == 0){
+					break;
+				}
+				var cut = len > this.digits ? this.digits : len;
+				values.push(parseInt(num_str.substr(len - cut, cut)));
+				num_str = num_str.substr(0, len - cut);
+			}
+			return {values: values, minus: minus};
+		},
+	};
+
+	var BigIntegerBinInstanceMethods = {
+		and: function(num){
+			return new this.constructor(and_raw(this.values, this.constructor.convert(num.values)));
+		},
+		
+		or: function(){
+			return new this.constructor(or_raw(this.values, this.constructor.convert(num.values)));
+		},
+
+		and_one: function(num){
+			return this.values[0] & num;
+		},
+		
+		or_one: function(){
+			return this.values[0] | num;
+		},
+	};
 
 	
 	var PRIME_TEST_COUNT = 20;
@@ -642,3 +716,5 @@ if(self["Lib"] == undefined){
 	Lib.BigInteger = BigInteger;
 	
 })();
+
+

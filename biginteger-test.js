@@ -60,6 +60,13 @@
 		puts("" + new (BigInteger.Bin(1))(17).pow(10,157));
 		puts("" + new (BigInteger.Dec(1))(17).pow(10,157));
 		
+		var x = new (BigInteger.Bin(26))("10");
+		
+		puts(x.pow(100));
+
+		puts(new BigInteger.BinMax("100000").mul(new BigInteger.BinMax("1000000")));
+
+		
 //		return;
 	
 
